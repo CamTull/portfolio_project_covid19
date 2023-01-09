@@ -19,10 +19,40 @@ where location like '%states%'
 order by 1,2
 
 -- Looking at Countries with highest infection rate compared to population
-SELECT location, population, MAX(total_cases) AS highest_infection_count, (MAX(total_cases)/population)*100 as contraction_percentage
+-- * Used with Tableau 3 *
+SELECT location, population, MAX(total_cases) AS highest_infection_count, 
+(MAX(total_cases)/population)*100 as contraction_percentage
 from PortfolioProject_Covid19.dbo.coviddeaths
 group by location, population
 order by contraction_percentage desc
+
+-- Cleaning some of global numbers data
+-- * Used with Tableau 2 *
+Select location, SUM(cast(new_deaths as int)) as TotalDeathCount
+From PortfolioProject_Covid19.dbo.coviddeaths
+--Where location like '%states%'
+Where continent is null 
+and location not in ('World', 'European Union', 'International', 'High income', 'upper middle income', 'lower middle income', 'low income')
+Group by location
+order by TotalDeathCount desc
+
+-- Showing infection count and total percent of population infected stratified by date
+-- * Used with Tableau 4 *
+Select Location, Population, date, MAX(total_cases) as HighestInfectionCount,  
+Max((total_cases/population))*100 as PercentPopulationInfected
+From PortfolioProject_Covid19.dbo.coviddeaths
+--Where location like '%states%'
+Group by Location, Population, date
+order by PercentPopulationInfected desc
+
+-- Same as above but without date as input
+-- * Used with Tableau 3 *
+Select Location, Population, MAX(total_cases) as HighestInfectionCount,  
+Max((total_cases/population))*100 as PercentPopulationInfected
+From PortfolioProject_Covid19.dbo.coviddeaths
+--Where location like '%states%'
+Group by Location, Population
+order by PercentPopulationInfected desc
 
 -- Showing countries with highest death count per population
 SELECT location, MAX(cast(total_deaths as int)) AS highest_death_count, (MAX(cast(total_deaths as int))/population)*100 as death_rate
@@ -48,6 +78,7 @@ group by location
 order by highest_death_count desc
 
 -- Global Numbers
+-- * Used for Tableau 1 *
 SELECT SUM(new_cases) as total_cases, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(new_cases)*100 AS death_rate
 from PortfolioProject_Covid19.dbo.coviddeaths
 --where location like '%states%'
